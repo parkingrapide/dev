@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>[ADMIN] Parking Aéroport Orly — Back Office</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#0f1117; --bg2:#161920; --bg3:#1e2128; --bg4:#252932;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#e2e8f0; --muted:#64748b;
+  --gold:#f59e0b; --gold2:#fbbf24;
+  --green:#10b981; --red:#ef4444; --blue:#3b82f6; --purple:#8b5cf6; --orange:#f97316;
+}
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ═══════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════ */
+.login-screen { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999; }
+.login-box { width:400px; background:var(--bg2); border:1px solid var(--border2); padding:2.5rem; }
+.login-brand { font-size:1rem; font-weight:700; color:var(--gold); margin-bottom:0.2rem; }
+.login-sub { font-size:0.75rem; color:var(--muted); margin-bottom:2rem; }
+.login-box h2 { font-size:1.25rem; font-weight:600; margin-bottom:1.5rem; }
+.lf label { display:block; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+.lf input { width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:0.75rem 1rem; font-family:'Inter',sans-serif; font-size:0.9rem; outline:none; margin-bottom:1rem; transition:border-color 0.2s; }
+.lf input:focus { border-color:var(--gold); }
+.login-btn { width:100%; background:var(--gold); color:#000; border:none; padding:0.85rem; font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:0.3rem; }
+.login-btn:hover { background:var(--gold2); }
+.login-error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--red); padding:0.6rem 1rem; font-size:0.78rem; margin-bottom:1rem; display:none; }
+.quick-users { margin-top:1.5rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+.quick-users p { font-size:0.7rem; color:var(--muted); margin-bottom:0.6rem; }
+.quser { display:inline-flex; align-items:center; gap:0.5rem; background:var(--bg3); border:1px solid var(--border); padding:0.35rem 0.8rem; font-size:0.73rem; cursor:pointer; margin:0.2rem; transition:border-color 0.2s; }
+.quser:hover { border-color:var(--gold); color:var(--gold); }
+.quser .qrole { font-size:0.63rem; color:var(--muted); }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.app { display:flex; min-height:100vh; }
+.sidebar { width:240px; flex-shrink:0; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:50; }
+.sb-logo { padding:1.3rem 1.2rem; border-bottom:1px solid var(--border); }
+.sb-brand { font-size:0.88rem; font-weight:700; color:var(--gold); line-height:1.3; }
+.sb-env { display:inline-block; font-size:0.58rem; letter-spacing:0.12em; text-transform:uppercase; background:rgba(245,158,11,0.12); color:var(--gold); padding:0.15rem 0.5rem; margin-top:0.35rem; }
+.sb-nav { flex:1; padding:0.8rem 0; overflow-y:auto; }
+.sb-section { padding:0.8rem 1.2rem 0.3rem; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); }
+.nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1.2rem; font-size:0.82rem; color:var(--muted); cursor:pointer; transition:all 0.15s; border-left:2px solid transparent; }
+.nav-item:hover { background:var(--bg3); color:var(--text); }
+.nav-item.active { background:rgba(245,158,11,0.08); color:var(--gold); border-left-color:var(--gold); }
+.nav-item svg { width:15px; height:15px; flex-shrink:0; }
+.nav-badge { margin-left:auto; background:var(--red); color:#fff; font-size:0.58rem; font-weight:700; padding:0.1rem 0.4rem; border-radius:99px; }
+.sb-user { padding:0.9rem 1.2rem; border-top:1px solid var(--border); display:flex; align-items:center; gap:0.75rem; }
+.u-avatar { width:30px; height:30px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; color:#000; flex-shrink:0; }
+.u-name { font-size:0.78rem; font-weight:500; }
+.u-role { font-size:0.65rem; color:var(--muted); }
+.u-logout { margin-left:auto; background:none; border:none; color:var(--muted); cursor:pointer; padding:0.25rem; transition:color 0.2s; }
+.u-logout:hover { color:var(--red); }
+.main { margin-left:240px; flex:1; display:flex; flex-direction:column; }
+.topbar { background:var(--bg2); border-bottom:1px solid var(--border); padding:0.9rem 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
+.topbar-title { font-size:0.95rem; font-weight:600; }
+.topbar-right { display:flex; align-items:center; gap:0.8rem; }
+.topbar-date { font-size:0.75rem; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+.content { padding:1.8rem 2rem; flex:1; }
+.page { display:none; }
+.page.active { display:block; animation:fadeIn 0.2s; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.page-hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem; }
+.page-title { font-size:1.3rem; font-weight:700; }
+.page-sub { font-size:0.78rem; color:var(--muted); margin-top:0.2rem; }
+
+/* ═══════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════ */
+.btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 1.1rem; font-family:'Inter',sans-serif; font-size:0.78rem; font-weight:500; cursor:pointer; border:none; transition:all 0.2s; }
+.btn-primary { background:var(--gold); color:#000; }
+.btn-primary:hover { background:var(--gold2); }
+.btn-ghost { background:var(--bg3); color:var(--text); border:1px solid var(--border); }
+.btn-ghost:hover { border-color:var(--border2); }
+.btn-danger { background:rgba(239,68,68,0.1); color:var(--red); border:1px solid rgba(239,68,68,0.2); }
+.btn-danger:hover { background:rgba(239,68,68,0.2); }
+.btn-green { background:rgba(16,185,129,0.1); color:var(--green); border:1px solid rgba(16,185,129,0.2); }
+.btn-green:hover { background:rgba(16,185,129,0.2); }
+.btn-sm { padding:0.35rem 0.75rem; font-size:0.72rem; }
+
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+.stat-card { background:var(--bg2); border:1px solid var(--border); padding:1.3rem; display:flex; flex-direction:column; }
+.stat-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:0.6rem; }
+.stat-lbl { font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+.stat-ico { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+.stat-ico svg { width:16px; height:16px; }
+.stat-val { font-size:1.8rem; font-weight:700; line-height:1; font-family:'JetBrains Mono',monospace; }
+.stat-delta { font-size:0.72rem; margin-top:0.35rem; }
+.up { color:var(--green); } .dn { color:var(--red); }
+
+.card { background:var(--bg2); border:1px solid var(--border); margin-bottom:1.5rem; }
+.card-hdr { padding:0.9rem 1.4rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.card-title { font-size:0.85rem; font-weight:600; }
+.card-body { padding:1.2rem 1.4rem; }
+
+/* Search & filters */
+.filters { display:flex; gap:0.7rem; flex-wrap:wrap; }
+.search-input { background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:0.5rem 0.9rem; font-family:'Inter',sans-serif; font-size:0.8rem; outline:none; width:220px; transition:border-color 0.2s; }
+.search-input:focus { border-color:var(--gold); }
+.filter-select { background:var(--bg3); border:1px solid var(--border); color:var(--text); padding:0.5rem 0.8rem; font-family:'Inter',sans-serif; font-size:0.78rem; outline:none; cursor:pointer; -webkit-appearance:none; }
+
+/* Table */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th { padding:0.6rem 1rem; font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-align:left; background:var(--bg3); border-bottom:1px solid var(--border); white-space:nowrap; }
+td { padding:0.8rem 1rem; font-size:0.82rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(255,255,255,0.015); }
+
+/* Badges */
+.badge { display:inline-block; padding:0.18rem 0.55rem; border-radius:99px; font-size:0.66rem; font-weight:600; white-space:nowrap; }
+.b-green  { background:rgba(16,185,129,0.12); color:var(--green); border:1px solid rgba(16,185,129,0.2); }
+.b-orange { background:rgba(249,115,22,0.12); color:var(--orange); border:1px solid rgba(249,115,22,0.2); }
+.b-blue   { background:rgba(59,130,246,0.12); color:var(--blue); border:1px solid rgba(59,130,246,0.2); }
+.b-red    { background:rgba(239,68,68,0.12); color:var(--red); border:1px solid rgba(239,68,68,0.2); }
+.b-muted  { background:rgba(100,116,139,0.1); color:var(--muted); border:1px solid rgba(100,116,139,0.15); }
+.b-gold   { background:rgba(245,158,11,0.12); color:var(--gold); border:1px solid rgba(245,158,11,0.2); }
+.b-purple { background:rgba(139,92,246,0.12); color:var(--purple); border:1px solid rgba(139,92,246,0.2); }
+
+/* Form */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.form-full { grid-column:1/-1; }
+.fg label { display:block; font-size:0.67rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+.fg input, .fg select, .fg textarea {
+  width:100%; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+  padding:0.7rem 0.9rem; font-family:'Inter',sans-serif; font-size:0.85rem; outline:none;
+  transition:border-color 0.2s; -webkit-appearance:none; resize:none;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus { border-color:var(--gold); }
+.fg select option { background:var(--bg3); }
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; display:none; align-items:center; justify-content:center; padding:1rem; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--bg2); border:1px solid var(--border2); width:100%; max-width:700px; max-height:90vh; display:flex; flex-direction:column; }
+.modal-hdr { padding:1.2rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.modal-title { font-size:1rem; font-weight:600; }
+.modal-close { background:none; border:none; color:var(--muted); font-size:1.2rem; cursor:pointer; padding:0.2rem 0.5rem; transition:color 0.2s; }
+.modal-close:hover { color:var(--red); }
+.modal-body { padding:1.5rem; overflow-y:auto; }
+.modal-footer { padding:1rem 1.5rem; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:0.7rem; flex-shrink:0; }
+
+/* Calendar */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.cal-day-name { text-align:center; font-size:0.65rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); padding:0.4rem 0; }
+.cal-day { background:var(--bg3); border:1px solid var(--border); padding:0.5rem; min-height:80px; position:relative; cursor:pointer; transition:border-color 0.2s; }
+.cal-day:hover { border-color:var(--border2); }
+.cal-day.today { border-color:var(--gold); }
+.cal-day.other-month { opacity:0.35; }
+.cal-day-num { font-size:0.78rem; font-weight:500; margin-bottom:0.4rem; }
+.cal-event { font-size:0.6rem; padding:0.15rem 0.4rem; margin-bottom:0.2rem; border-radius:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-event.arr { background:rgba(16,185,129,0.2); color:var(--green); }
+.cal-event.dep { background:rgba(59,130,246,0.2); color:var(--blue); }
+.cal-event.park { background:rgba(245,158,11,0.15); color:var(--gold); }
+.cal-nav { display:flex; align-items:center; gap:1rem; }
+.cal-month { font-size:1rem; font-weight:600; min-width:200px; text-align:center; }
+
+/* Chart bars */
+.chart-bar-wrap { display:flex; flex-direction:column; gap:0.6rem; }
+.chart-row { display:flex; align-items:center; gap:0.8rem; }
+.chart-label { font-size:0.75rem; color:var(--muted); width:70px; flex-shrink:0; }
+.chart-bar-bg { flex:1; background:var(--bg3); height:28px; position:relative; }
+.chart-bar-fill { position:absolute; left:0; top:0; bottom:0; background:var(--gold); opacity:0.8; transition:width 0.6s; }
+.chart-val { font-size:0.75rem; font-family:'JetBrains Mono',monospace; color:var(--text); width:70px; text-align:right; flex-shrink:0; }
+
+/* Tarifs editor */
+.tarif-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.tarif-card { background:var(--bg3); border:1px solid var(--border); padding:1.4rem; }
+.tarif-name { font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem; }
+.tarif-row { display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
+.tarif-row:last-child { border-bottom:none; }
+.tarif-input { background:var(--bg4); border:1px solid var(--border); color:var(--gold); padding:0.3rem 0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.85rem; width:80px; text-align:right; outline:none; }
+.tarif-input:focus { border-color:var(--gold); }
+.saison-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:0.5rem; margin-top:1rem; }
+.saison-cell { background:var(--bg3); border:1px solid var(--border); padding:0.6rem; text-align:center; }
+.saison-mois { font-size:0.65rem; color:var(--muted); margin-bottom:0.3rem; }
+.saison-val { font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:var(--gold); }
+.saison-input { background:transparent; border:none; color:var(--gold); font-family:'JetBrains Mono',monospace; font-size:0.8rem; width:100%; text-align:center; outline:none; }
+
+/* ═══════════════════════════════════════════
+   PRINT STYLES — 3 BONS
+═══════════════════════════════════════════ */
+@media print {
+  body * { visibility:hidden !important; }
+  .print-zone, .print-zone * { visibility:visible !important; }
+  .print-zone { position:fixed; inset:0; background:#fff; z-index:9999; }
+  @page { margin:8mm; }
+}
+
+/* Print preview modal */
+.print-container { display:flex; flex-direction:column; gap:1.5rem; }
+
+/* BON CLIENT — A5 paysage */
+.bon-client {
+  background:#fff; color:#000; padding:20px 24px;
+  border:2px solid #1a1a2e; font-family:'Inter',sans-serif;
+  width:100%; page-break-after:always;
+}
+.bon-client .bon-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #1a1a2e; padding-bottom:10px; margin-bottom:12px; }
+.bon-client .bon-logo { font-size:14px; font-weight:700; color:#1a1a2e; line-height:1.3; }
+.bon-client .bon-logo span { display:block; font-size:10px; font-weight:400; color:#666; }
+.bon-client .bon-type { text-align:right; }
+.bon-client .bon-type-label { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:#666; }
+.bon-client .bon-type-title { font-size:16px; font-weight:700; color:#1a1a2e; }
+.bon-client .bon-num { font-size:10px; font-family:'JetBrains Mono',monospace; color:#666; }
+.bon-body { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.bon-section h4 { font-size:8px; letter-spacing:0.15em; text-transform:uppercase; color:#999; border-bottom:1px solid #eee; padding-bottom:4px; margin-bottom:8px; }
+.bon-row { display:flex; justify-content:space-between; font-size:10px; padding:2px 0; }
+.bon-row label { color:#666; }
+.bon-row strong { color:#000; font-weight:600; }
+.bon-total-box { background:#1a1a2e; color:#fff; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.bon-total-box .ttl-label { font-size:9px; letter-spacing:0.12em; text-transform:uppercase; }
+.bon-total-box .ttl-amount { font-size:20px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+.bon-footer { font-size:8px; color:#999; text-align:center; border-top:1px solid #eee; padding-top:8px; }
+.bon-qr-placeholder { width:52px; height:52px; border:2px dashed #ccc; display:flex; align-items:center; justify-content:center; font-size:7px; color:#ccc; text-align:center; flex-shrink:0; }
+.bon-header-right { display:flex; gap:10px; align-items:flex-start; }
+
+/* BON PARE-BRISE — petit format */
+.bon-parebrise {
+  background:#fff; color:#000; padding:14px 16px;
+  border:3px solid #f59e0b; font-family:'Inter',sans-serif;
+  width:220px; page-break-after:always;
+}
+.pb-title { background:#f59e0b; margin:-14px -16px 10px; padding:8px 14px; font-size:11px; font-weight:700; color:#000; text-align:center; letter-spacing:0.05em; }
+.pb-brand { font-size:8px; color:#666; text-align:center; margin-bottom:8px; }
+.pb-plate { background:#1a1a2e; color:#fff; text-align:center; font-size:20px; font-weight:700; font-family:'JetBrains Mono',monospace; padding:8px; margin-bottom:8px; letter-spacing:0.1em; }
+.pb-row { display:flex; justify-content:space-between; font-size:9px; padding:3px 0; border-bottom:1px dashed #eee; }
+.pb-row:last-child { border-bottom:none; }
+.pb-row label { color:#666; }
+.pb-row strong { color:#000; font-weight:600; }
+.pb-num { text-align:center; font-size:8px; color:#999; margin-top:8px; font-family:'JetBrains Mono',monospace; }
+.pb-warning { background:#fff3cd; border:1px solid #f59e0b; font-size:8px; color:#856404; padding:5px 8px; margin-top:8px; text-align:center; }
+
+/* BON CLÉ — très petit */
+.bon-cle {
+  background:#fff; color:#000; padding:10px 12px;
+  border:2px solid #1a1a2e; font-family:'Inter',sans-serif;
+  width:160px; page-break-after:auto;
+  border-radius:4px;
+}
+.cle-title { background:#1a1a2e; margin:-10px -12px 8px; padding:6px 10px; font-size:9px; font-weight:700; color:#fff; text-align:center; border-radius:2px 2px 0 0; }
+.cle-num { font-size:14px; font-weight:700; font-family:'JetBrains Mono',monospace; color:#1a1a2e; text-align:center; margin:6px 0; }
+.cle-name { font-size:9px; font-weight:600; color:#000; text-align:center; margin-bottom:6px; }
+.cle-plate { background:#f59e0b; color:#000; font-size:13px; font-weight:700; font-family:'JetBrains Mono',monospace; text-align:center; padding:4px; margin-bottom:6px; letter-spacing:0.08em; }
+.cle-row { display:flex; justify-content:space-between; font-size:8px; padding:2px 0; }
+.cle-row label { color:#666; }
+.cle-row strong { color:#000; }
+.cle-cut { border-top:1px dashed #ccc; margin:6px 0; }
+.cle-tel { font-size:8px; color:#666; text-align:center; }
+
+/* Print zones labels */
+.print-label { display:flex; align-items:center; gap:0.8rem; margin-bottom:0.8rem; }
+.print-label-badge { padding:0.25rem 0.8rem; font-size:0.7rem; font-weight:600; }
+.print-label-desc { font-size:0.78rem; color:var(--muted); }
+.print-sep { border:none; border-top:1px dashed rgba(255,255,255,0.1); margin:1rem 0; }
+
+/* Notif */
+.toast { position:fixed; bottom:2rem; right:2rem; background:var(--bg2); border:1px solid var(--border2); padding:0.8rem 1.2rem; font-size:0.82rem; z-index:500; animation:slideUp 0.3s; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+.toast.success { border-left:3px solid var(--green); }
+.toast.info { border-left:3px solid var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-brand">🅿 Parking Aéroport Orly</div>
+    <div class="login-sub">Back Office — Accès sécurisé</div>
+    <h2>Connexion</h2>
+    <div class="login-error" id="loginError">Identifiants incorrects. Réessayez.</div>
+    <div class="lf">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@parkingaeroportorly.fr" />
+      <label>Mot de passe</label>
+      <input type="password" id="loginPwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      <button class="login-btn" onclick="doLogin()">Se connecter</button>
+    </div>
+    <div class="quick-users">
+      <p>Connexion rapide (démo) :</p>
+      <div class="quser" onclick="quickLogin('admin@parkingaeroportorly.fr','admin123','Administrateur','Admin')">👑 Admin <span class="qrole">admin123</span></div>
+      <div class="quser" onclick="quickLogin('agent@parkingaeroportorly.fr','agent123','Agent Accueil','Agent')">👤 Agent <span class="qrole">agent123</span></div>
+      <div class="quser" onclick="quickLogin('manager@parkingaeroportorly.fr','mgr123','Manager','Manager')">📊 Manager <span class="qrole">mgr123</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-brand">🅿 Parking Aéroport Orly</div>
+      <div class="sb-env">DEV — v1.0.0</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Tableau de bord
+      </div>
+      <div class="nav-item" onclick="showPage('reservations')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        Réservations
+        <span class="nav-badge" id="badge-resa">3</span>
+      </div>
+      <div class="nav-item" onclick="showPage('calendrier')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendrier
+      </div>
+      <div class="sb-section">Gestion</div>
+      <div class="nav-item" onclick="showPage('clients')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clients
+      </div>
+      <div class="nav-item" onclick="showPage('tarifs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Tarifs & Saisons
+      </div>
+      <div class="sb-section">Analyses</div>
+      <div class="nav-item" onclick="showPage('stats')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Statistiques & CA
+      </div>
+      <div class="sb-section">Impression</div>
+      <div class="nav-item" onclick="showPage('impression')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimer les bons
+      </div>
+    </nav>
+    <div class="sb-user">
+      <div class="u-avatar" id="userAv">A</div>
+      <div>
+        <div class="u-name" id="userName">Admin</div>
+        <div class="u-role" id="userRole">Administrateur</div>
+      </div>
+      <button class="u-logout" onclick="logout()" title="Déconnexion">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Tableau de bord</div>
+      <div class="topbar-right">
+        <span class="topbar-date" id="topbarDate"></span>
+        <button class="btn btn-primary btn-sm" onclick="showPage('reservations');openNewResa()">+ Nouvelle réservation</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══ DASHBOARD ═══ -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-hdr">
+          <div><div class="page-title">Tableau de bord</div><div class="page-sub">Vue d'ensemble en temps réel</div></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-lbl">Réservations du jour</div>
+              <div class="stat-ico" style="background:rgba(245,158,11,0.1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+              </div>
+            </div>
+            <div class="stat-val" style="color:var(--gold)">7</div>
+            <div class="stat-delta up">↑ +2 vs hier</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-lbl">Voitures en parking</div>
+              <div class="stat-ico" style="background:rgba(59,130,246,0.1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              </div>
+            </div>
+            <div class="stat-val" style="color:var(--blue)">23</div>
+            <div class="stat-delta" style="color:var(--muted)">sur 50 places</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-lbl">CA du mois</div>
+              <div class="stat-ico" style="background:rgba(16,185,129,0.1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <div class="stat-val" style="color:var(--green)">4 820€</div>
+            <div class="stat-delta up">↑ +18% vs mois dernier</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-lbl">Départs aujourd'hui</div>
+              <div class="stat-ico" style="background:rgba(139,92,246,0.1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+              </div>
+            </div>
+            <div class="stat-val" style="color:var(--purple)">4</div>
+            <div class="stat-delta" style="color:var(--muted)">3 retours attendus</div>
+          </div>
+        </div>
+
+        <!-- Reservations en attente -->
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">⚡ Réservations en attente de confirmation</div>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('reservations')">Voir toutes →</button>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>N°</th><th>Client</th><th>Départ</th><th>Retour</th><th>Durée</th><th>Formule</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="dashResaTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Activité du jour -->
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📍 Activité du jour</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+              <div>
+                <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem">✈ Départs</div>
+                <div id="todayDep" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+              </div>
+              <div>
+                <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem">🛬 Retours</div>
+                <div id="todayRet" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+              </div>
+              <div>
+                <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem">🅿 Parking</div>
+                <div>
+                  <div style="background:var(--bg3);height:12px;border-radius:2px;margin-bottom:0.4rem;overflow:hidden"><div style="background:var(--gold);height:100%;width:46%"></div></div>
+                  <div style="font-size:0.75rem;color:var(--muted)">23 / 50 places occupées <span style="color:var(--green)">(46%)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ RESERVATIONS ═══ -->
+      <div class="page" id="page-reservations">
+        <div class="page-hdr">
+          <div><div class="page-title">Réservations</div><div class="page-sub">Gestion complète des réservations</div></div>
+          <div style="display:flex;gap:0.7rem">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Exporter CSV</button>
+            <button class="btn btn-primary" onclick="openNewResa()">+ Nouvelle réservation</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="filters">
+              <input class="search-input" placeholder="🔍 Nom, plaque, n° résa..." oninput="filterResas(this.value)" />
+              <select class="filter-select" onchange="filterByStatus(this.value)">
+                <option value="">Tous les statuts</option>
+                <option value="confirmee">Confirmée</option>
+                <option value="attente">En attente</option>
+                <option value="parking">En parking</option>
+                <option value="terminee">Terminée</option>
+                <option value="annulee">Annulée</option>
+              </select>
+              <select class="filter-select" onchange="filterByMonth(this.value)">
+                <option value="">Tous les mois</option>
+                <option value="4">Avril 2025</option>
+                <option value="5">Mai 2025</option>
+                <option value="6">Juin 2025</option>
+                <option value="7">Juillet 2025</option>
+              </select>
+            </div>
+            <div style="font-size:0.75rem;color:var(--muted)" id="resaCount">— réservations</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>N° Résa</th><th>Client</th><th>Véhicule</th><th>Départ</th><th>Retour</th><th>Jours</th><th>Formule</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="resaTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ CALENDRIER ═══ -->
+      <div class="page" id="page-calendrier">
+        <div class="page-hdr">
+          <div><div class="page-title">Calendrier</div><div class="page-sub">Disponibilités et planning</div></div>
+          <div class="cal-nav">
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">← Préc.</button>
+            <span class="cal-month" id="calMonthTitle"></span>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">Suiv. →</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-body" style="padding:1rem">
+            <div style="display:flex;gap:1.5rem;font-size:0.75rem">
+              <span><span style="display:inline-block;width:10px;height:10px;background:rgba(16,185,129,0.3);margin-right:5px"></span>Arrivée / Dépôt voiture</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:rgba(59,130,246,0.3);margin-right:5px"></span>Retour / Récupération</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:rgba(245,158,11,0.2);margin-right:5px"></span>En parking</span>
+            </div>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div style="margin-top:0.3rem;font-size:0.7rem;text-align:right;color:var(--muted)">Cliquez sur une date pour voir les réservations</div>
+      </div>
+
+      <!-- ═══ CLIENTS ═══ -->
+      <div class="page" id="page-clients">
+        <div class="page-hdr">
+          <div><div class="page-title">Clients</div><div class="page-sub">Base de données clients</div></div>
+          <button class="btn btn-primary" onclick="openNewClient()">+ Nouveau client</button>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="filters">
+              <input class="search-input" placeholder="🔍 Nom, email, téléphone..." oninput="filterClients(this.value)" />
+            </div>
+            <div style="font-size:0.75rem;color:var(--muted)" id="clientCount">— clients</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Client</th><th>Téléphone</th><th>Email</th><th>Véhicule habituel</th><th>Réservations</th><th>CA total</th><th>Fidélité</th><th>Actions</th></tr></thead>
+              <tbody id="clientTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TARIFS ═══ -->
+      <div class="page" id="page-tarifs">
+        <div class="page-hdr">
+          <div><div class="page-title">Tarifs & Saisons</div><div class="page-sub">Gérez vos prix et majorations saisonnières</div></div>
+          <button class="btn btn-primary" onclick="saveTarifs()">💾 Enregistrer les modifications</button>
+        </div>
+        <div class="tarif-grid" style="margin-bottom:1.5rem">
+          <div class="tarif-card">
+            <div class="tarif-name">🟡 Formule Essentielle</div>
+            <div class="tarif-row"><span>Prix / jour</span><input class="tarif-input" id="t-e-pj" value="9" /> €</div>
+            <div class="tarif-row"><span>Minimum jours</span><input class="tarif-input" id="t-e-min" value="2" /> j</div>
+            <div class="tarif-row"><span>Navette aller</span><span style="color:var(--green);font-size:0.8rem">✓ Incluse</span></div>
+            <div class="tarif-row"><span>Navette retour</span><span style="color:var(--green);font-size:0.8rem">✓ Incluse</span></div>
+          </div>
+          <div class="tarif-card" style="border-color:var(--gold)">
+            <div class="tarif-name">⭐ Formule Confort <span style="font-size:0.6rem;color:var(--muted)">(+ populaire)</span></div>
+            <div class="tarif-row"><span>Prix / jour</span><input class="tarif-input" id="t-c-pj" value="11" /> €</div>
+            <div class="tarif-row"><span>Minimum jours</span><input class="tarif-input" id="t-c-min" value="4" /> j</div>
+            <div class="tarif-row"><span>Nettoyage int.</span><span style="color:var(--green);font-size:0.8rem">✓ Inclus</span></div>
+            <div class="tarif-row"><span>Annulation</span><span style="color:var(--green);font-size:0.8rem">✓ J-2</span></div>
+          </div>
+          <div class="tarif-card">
+            <div class="tarif-name">🏆 Formule Longue Durée</div>
+            <div class="tarif-row"><span>Prix / jour</span><input class="tarif-input" id="t-l-pj" value="7" /> €</div>
+            <div class="tarif-row"><span>Minimum jours</span><input class="tarif-input" id="t-l-min" value="10" /> j</div>
+            <div class="tarif-row"><span>Lavage ext.</span><span style="color:var(--green);font-size:0.8rem">✓ Inclus</span></div>
+            <div class="tarif-row"><span>Annulation</span><span style="color:var(--green);font-size:0.8rem">✓ J-3</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📈 Majorations saisonnières (%)</div><div style="font-size:0.75rem;color:var(--muted)">0 = pas de majoration · 22 = +22%</div></div>
+          <div class="card-body">
+            <div class="saison-grid">
+              <div class="saison-cell"><div class="saison-mois">Jan</div><input class="saison-input" value="0" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Fév</div><input class="saison-input" value="0" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Mar</div><input class="saison-input" value="5" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Avr</div><input class="saison-input" value="8" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Mai</div><input class="saison-input" value="10" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Juin</div><input class="saison-input" value="18" />%</div>
+              <div class="saison-cell" style="border-color:var(--gold)"><div class="saison-mois" style="color:var(--gold)">Juil ⚡</div><input class="saison-input" value="22" style="color:var(--orange)" />%</div>
+              <div class="saison-cell" style="border-color:var(--gold)"><div class="saison-mois" style="color:var(--gold)">Août ⚡</div><input class="saison-input" value="22" style="color:var(--orange)" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Sep</div><input class="saison-input" value="12" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Oct</div><input class="saison-input" value="5" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Nov</div><input class="saison-input" value="0" />%</div>
+              <div class="saison-cell"><div class="saison-mois">Déc 🎄</div><input class="saison-input" value="15" />%</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">🛠 Options à la carte</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem">
+              <div class="tarif-row"><span>🧽 Lavage extérieur</span><input class="tarif-input" value="15" /> €</div>
+              <div class="tarif-row"><span>🧹 Nettoyage intérieur</span><input class="tarif-input" value="20" /> €</div>
+              <div class="tarif-row"><span>🔧 Contrôle pneus</span><input class="tarif-input" value="8" /> €</div>
+              <div class="tarif-row"><span>🔄 Annulation flexible</span><input class="tarif-input" value="10" /> €</div>
+              <div class="tarif-row"><span>⚡ Navette prioritaire</span><input class="tarif-input" value="12" /> €</div>
+              <div class="tarif-row"><span>🌙 Hors horaires</span><input class="tarif-input" value="18" /> €</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ STATS ═══ -->
+      <div class="page" id="page-stats">
+        <div class="page-hdr">
+          <div><div class="page-title">Statistiques & CA</div><div class="page-sub">Analyse de votre activité</div></div>
+          <select class="filter-select" onchange="updateStats(this.value)">
+            <option value="2025">Année 2025</option>
+            <option value="2024">Année 2024</option>
+          </select>
+        </div>
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="stat-top"><div class="stat-lbl">CA annuel</div></div><div class="stat-val" style="color:var(--green)">38 420€</div><div class="stat-delta up">↑ +24% vs 2024</div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-lbl">Réservations totales</div></div><div class="stat-val" style="color:var(--blue)">312</div><div class="stat-delta up">↑ +31 vs 2024</div></div>
+          <div class="stat-card"><div class="stat-top"><div class="stat-lbl">Panier moyen</div></div><div class="stat-val" style="color:var(--gold)">123€</div><div class="stat-delta up">↑ +8€ vs 2024</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">📊 CA mensuel 2025</div></div>
+            <div class="card-body">
+              <div class="chart-bar-wrap" id="chartCA"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">🏷 Répartition par formule</div></div>
+            <div class="card-body">
+              <div class="chart-bar-wrap" id="chartFormule"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">📅 Réservations par mois</div></div>
+            <div class="card-body">
+              <div class="chart-bar-wrap" id="chartResas"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">⏱ Durée moyenne de séjour</div></div>
+            <div class="card-body">
+              <div class="chart-bar-wrap" id="chartDuree"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ IMPRESSION ═══ -->
+      <div class="page" id="page-impression">
+        <div class="page-hdr">
+          <div><div class="page-title">Imprimer les bons</div><div class="page-sub">3 bons générés automatiquement par réservation</div></div>
+        </div>
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card-hdr"><div class="card-title">Sélectionner une réservation</div></div>
+          <div class="card-body">
+            <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+              <select class="filter-select" id="printResaSelect" onchange="loadPrintPreview(this.value)" style="min-width:300px">
+                <option value="">-- Choisir une réservation --</option>
+              </select>
+              <button class="btn btn-primary" onclick="printAllBons()">🖨 Imprimer les 3 bons</button>
+              <button class="btn btn-ghost btn-sm" onclick="printBon('client')">📄 Bon client seul</button>
+              <button class="btn btn-ghost btn-sm" onclick="printBon('parebrise')">🚗 Pare-brise seul</button>
+              <button class="btn btn-ghost btn-sm" onclick="printBon('cle')">🔑 Étiquette clé seule</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="printPreviewZone" style="display:none">
+          <!-- Preview labels -->
+          <div class="print-container" id="allBons">
+
+            <!-- BON 1 : CLIENT -->
+            <div>
+              <div class="print-label">
+                <span class="print-label-badge b-blue">📄 BON CLIENT</span>
+                <span class="print-label-desc">À remettre au client lors du dépôt de son véhicule</span>
+              </div>
+              <div class="bon-client" id="bonClient">
+                <div class="bon-client bon-header">
+                  <div>
+                    <div class="bon-logo">🅿 Parking Aéroport Orly<span>parkingaeroportorly.fr · +33 1 23 45 67 89</span></div>
+                  </div>
+                  <div class="bon-header-right">
+                    <div class="bon-type">
+                      <div class="bon-type-label">BON DE DÉPÔT / RETRAIT</div>
+                      <div class="bon-type-title">Bon Client</div>
+                      <div class="bon-num" id="bc-num">N° PAO-2025-0001</div>
+                    </div>
+                    <div class="bon-qr-placeholder">QR<br>Code</div>
+                  </div>
+                </div>
+                <div class="bon-body">
+                  <div class="bon-section">
+                    <h4>Informations client</h4>
+                    <div class="bon-row"><label>Nom</label><strong id="bc-nom">—</strong></div>
+                    <div class="bon-row"><label>Téléphone</label><strong id="bc-tel">—</strong></div>
+                    <div class="bon-row"><label>Email</label><strong id="bc-email">—</strong></div>
+                  </div>
+                  <div class="bon-section">
+                    <h4>Véhicule</h4>
+                    <div class="bon-row"><label>Immatriculation</label><strong id="bc-plaque">—</strong></div>
+                    <div class="bon-row"><label>Marque / Modèle</label><strong id="bc-vehicule">—</strong></div>
+                    <div class="bon-row"><label>Couleur</label><strong id="bc-couleur">—</strong></div>
+                  </div>
+                  <div class="bon-section">
+                    <h4>Dates & horaires</h4>
+                    <div class="bon-row"><label>Dépôt</label><strong id="bc-dep">—</strong></div>
+                    <div class="bon-row"><label>Heure navette aller</label><strong id="bc-hdep">—</strong></div>
+                    <div class="bon-row"><label>Terminal Orly</label><strong id="bc-terminal">—</strong></div>
+                  </div>
+                  <div class="bon-section">
+                    <h4>Retour prévu</h4>
+                    <div class="bon-row"><label>Date retour</label><strong id="bc-ret">—</strong></div>
+                    <div class="bon-row"><label>Heure atterrissage</label><strong id="bc-hret">—</strong></div>
+                    <div class="bon-row"><label>Durée</label><strong id="bc-duree">—</strong></div>
+                  </div>
+                </div>
+                <div class="bon-total-box">
+                  <div>
+                    <div class="ttl-label">Formule</div>
+                    <div style="font-size:13px;font-weight:600" id="bc-formule">—</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="ttl-label">Total réglé</div>
+                    <div class="ttl-amount" id="bc-total">—</div>
+                  </div>
+                </div>
+                <div class="bon-footer">
+                  ⚠️ Conservez ce bon précieusement — présentez-le à votre retour pour récupérer votre véhicule.
+                  En cas d'urgence appelez le +33 1 23 45 67 89 (disponible 24h/24).
+                  parkingaeroportorly.fr
+                </div>
+              </div>
+            </div>
+
+            <hr class="print-sep">
+
+            <!-- BON 2 : PARE-BRISE -->
+            <div>
+              <div class="print-label">
+                <span class="print-label-badge b-gold">🚗 BON PARE-BRISE</span>
+                <span class="print-label-desc">À placer sur le tableau de bord / pare-brise du véhicule</span>
+              </div>
+              <div class="bon-parebrise" id="bonParebrise">
+                <div class="pb-title">🅿 PARKING AÉROPORT ORLY</div>
+                <div class="pb-brand">parkingaeroportorly.fr</div>
+                <div class="pb-plate" id="pb-plaque">XX-000-XX</div>
+                <div class="pb-row"><label>Réservation</label><strong id="pb-num">PAO-2025-0001</strong></div>
+                <div class="pb-row"><label>Client</label><strong id="pb-nom">—</strong></div>
+                <div class="pb-row"><label>Dépôt</label><strong id="pb-dep">—</strong></div>
+                <div class="pb-row"><label>Retour prévu</label><strong id="pb-ret">—</strong></div>
+                <div class="pb-row"><label>Durée</label><strong id="pb-duree">—</strong></div>
+                <div class="pb-row"><label>Terminal</label><strong id="pb-terminal">—</strong></div>
+                <div class="pb-row"><label>Formule</label><strong id="pb-formule">—</strong></div>
+                <div class="pb-num" id="pb-num2">—</div>
+                <div class="pb-warning">⚠️ NE PAS DÉPLACER CE VÉHICULE<br>sans autorisation du responsable</div>
+              </div>
+            </div>
+
+            <hr class="print-sep">
+
+            <!-- BON 3 : CLÉ -->
+            <div>
+              <div class="print-label">
+                <span class="print-label-badge b-green">🔑 ÉTIQUETTE CLÉ</span>
+                <span class="print-label-desc">À fixer au trousseau de clés du client</span>
+              </div>
+              <div class="bon-cle" id="bonCle">
+                <div class="cle-title">🔑 CLÉ VÉHICULE</div>
+                <div class="cle-num" id="cle-num">PAO-2025-0001</div>
+                <div class="cle-name" id="cle-nom">—</div>
+                <div class="cle-plate" id="cle-plaque">XX-000-XX</div>
+                <div class="cle-row"><label>Dépôt</label><strong id="cle-dep">—</strong></div>
+                <div class="cle-row"><label>Retour</label><strong id="cle-ret">—</strong></div>
+                <div class="cle-row"><label>Formule</label><strong id="cle-formule">—</strong></div>
+                <div class="cle-cut"></div>
+                <div class="cle-tel">☎ +33 1 23 45 67 89</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="printEmpty" style="text-align:center;padding:4rem;color:var(--muted)">
+          ← Sélectionnez une réservation pour prévisualiser et imprimer les 3 bons
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ═══ MODAL RÉSERVATION ═══ -->
+<div class="modal-overlay" id="modalResa">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modalResaTitle">Nouvelle réservation</div>
+      <button class="modal-close" onclick="closeModal('modalResa')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label>Client *</label>
+          <select id="mr-client">
+            <option value="">-- Sélectionner --</option>
+          </select>
+        </div>
+        <div class="fg"><label>Statut</label>
+          <select id="mr-statut">
+            <option value="attente">En attente</option>
+            <option value="confirmee">Confirmée</option>
+            <option value="parking">En parking</option>
+            <option value="terminee">Terminée</option>
+            <option value="annulee">Annulée</option>
+          </select>
+        </div>
+        <div class="fg"><label>Date de départ</label><input type="date" id="mr-dep" /></div>
+        <div class="fg"><label>Date de retour</label><input type="date" id="mr-ret" /></div>
+        <div class="fg"><label>Heure navette aller</label><input type="time" id="mr-hdep" value="08:00" /></div>
+        <div class="fg"><label>Heure atterrissage</label><input type="time" id="mr-hret" value="18:00" /></div>
+        <div class="fg"><label>Terminal Orly</label>
+          <select id="mr-terminal">
+            <option value="Orly 1">Orly 1 — International</option>
+            <option value="Orly 2">Orly 2 — International</option>
+            <option value="Orly 3">Orly 3 — National</option>
+            <option value="Orly 4">Orly 4 — National</option>
+          </select>
+        </div>
+        <div class="fg"><label>Formule</label>
+          <select id="mr-formule">
+            <option value="Essentielle">Essentielle (9€/j)</option>
+            <option value="Confort">Confort (11€/j)</option>
+            <option value="Longue Durée">Longue Durée (7€/j)</option>
+          </select>
+        </div>
+        <div class="fg form-full"><label>Options</label>
+          <select id="mr-options" multiple style="height:80px">
+            <option value="Lavage ext. +15€">Lavage extérieur (+15€)</option>
+            <option value="Nettoyage int. +20€">Nettoyage intérieur (+20€)</option>
+            <option value="Pneus +8€">Contrôle pneus (+8€)</option>
+            <option value="Flexible +10€">Annulation flexible (+10€)</option>
+            <option value="Prioritaire +12€">Navette prioritaire (+12€)</option>
+            <option value="Hors horaires +18€">Hors horaires (+18€)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Total (€)</label><input type="number" id="mr-total" placeholder="0.00" /></div>
+        <div class="fg"><label>Paiement</label>
+          <select id="mr-paiement">
+            <option value="en_ligne">En ligne</option>
+            <option value="sur_place">Sur place</option>
+            <option value="virement">Virement</option>
+          </select>
+        </div>
+        <div class="fg form-full"><label>Notes internes</label><textarea id="mr-notes" rows="2" placeholder="Informations pour l'équipe..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalResa')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveResa()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL CLIENT ═══ -->
+<div class="modal-overlay" id="modalClient">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Nouveau client</div>
+      <button class="modal-close" onclick="closeModal('modalClient')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label>Prénom *</label><input type="text" id="mc-prenom" placeholder="Jean" /></div>
+        <div class="fg"><label>Nom *</label><input type="text" id="mc-nom" placeholder="Dupont" /></div>
+        <div class="fg"><label>Téléphone *</label><input type="tel" id="mc-tel" placeholder="+33 6 12 34 56 78" /></div>
+        <div class="fg"><label>Email</label><input type="email" id="mc-email" placeholder="jean@email.com" /></div>
+        <div class="fg"><label>Marque véhicule</label><input type="text" id="mc-marque" placeholder="Renault" /></div>
+        <div class="fg"><label>Modèle</label><input type="text" id="mc-modele" placeholder="Clio" /></div>
+        <div class="fg"><label>Immatriculation</label><input type="text" id="mc-plaque" placeholder="AB-123-CD" /></div>
+        <div class="fg"><label>Couleur</label><input type="text" id="mc-couleur" placeholder="Gris anthracite" /></div>
+        <div class="fg form-full"><label>Notes</label><textarea id="mc-notes" rows="2" placeholder="Informations particulières..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalClient')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveClient()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast" style="display:none"></div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+// ─── AUTH ──────────────────────────────
+const USERS = [
+  { email:'admin@parkingaeroportorly.fr',   pwd:'admin123', nom:'Sophie Admin',  role:'Administrateur' },
+  { email:'agent@parkingaeroportorly.fr',   pwd:'agent123', nom:'Marc Agent',    role:'Agent Accueil'  },
+  { email:'manager@parkingaeroportorly.fr', pwd:'mgr123',   nom:'Julie Manager', role:'Manager'        },
+];
+let currentUser = null;
+
+function quickLogin(email, pwd, nom, role) {
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPwd').value = pwd;
+  doLogin();
+}
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('loginPwd').value;
+  const user  = USERS.find(u => u.email === email && u.pwd === pwd);
+  if (!user) { document.getElementById('loginError').style.display = 'block'; return; }
+  currentUser = user;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'flex';
+  document.getElementById('userAv').textContent = user.nom[0];
+  document.getElementById('userName').textContent = user.nom;
+  document.getElementById('userRole').textContent = user.role;
+  initApp();
+}
+function logout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+}
+
+// ─── DATA ──────────────────────────────
+let clients = [
+  { id:1, prenom:'Sophie',  nom:'Martin',   tel:'+33 6 11 22 33 44', email:'sophie.martin@gmail.com',  marque:'Renault', modele:'Clio',    plaque:'AB-123-CD', couleur:'Gris', notes:'', nbResas:5, caTotal:580 },
+  { id:2, prenom:'Laurent', nom:'Bernard',  tel:'+33 6 22 33 44 55', email:'l.bernard@outlook.fr',     marque:'Peugeot', modele:'308',     plaque:'EF-456-GH', couleur:'Blanc', notes:'', nbResas:3, caTotal:320 },
+  { id:3, prenom:'Isabelle',nom:'Klein',    tel:'+33 6 33 44 55 66', email:'isa.klein@free.fr',        marque:'BMW',     modele:'Serie 3', plaque:'IJ-789-KL', couleur:'Noir', notes:'Cliente fidèle', nbResas:8, caTotal:1240 },
+  { id:4, prenom:'Thomas',  nom:'Dupont',   tel:'+33 6 44 55 66 77', email:'thomas.dupont@gmail.com',  marque:'Toyota',  modele:'Yaris',   plaque:'MN-012-OP', couleur:'Rouge', notes:'', nbResas:2, caTotal:198 },
+  { id:5, prenom:'Marie',   nom:'Leclerc',  tel:'+33 6 55 66 77 88', email:'marie.l@hotmail.fr',       marque:'Citroën', modele:'C3',      plaque:'QR-345-ST', couleur:'Bleu', notes:'', nbResas:1, caTotal:88  },
+  { id:6, prenom:'Pierre',  nom:'Moreau',   tel:'+33 6 66 77 88 99', email:'p.moreau@gmail.com',       marque:'Audi',    modele:'A4',      plaque:'UV-678-WX', couleur:'Argent', notes:'VIP', nbResas:12, caTotal:2100 },
+];
+
+let reservations = [
+  { id:'PAO-2025-0001', clientId:1, dep:'2025-04-10', ret:'2025-04-18', hdep:'09:00', hret:'17:30', terminal:'Orly 3', formule:'Confort',      options:[], total:96.8,  statut:'confirmee', paiement:'en_ligne', notes:'' },
+  { id:'PAO-2025-0002', clientId:2, dep:'2025-04-12', ret:'2025-04-15', hdep:'06:00', hret:'20:00', terminal:'Orly 1', formule:'Essentielle',   options:['Lavage ext. +15€'], total:52,  statut:'attente',   paiement:'sur_place', notes:'Vol tôt, prévoir hors horaires' },
+  { id:'PAO-2025-0003', clientId:3, dep:'2025-04-08', ret:'2025-04-20', hdep:'11:00', hret:'14:00', terminal:'Orly 2', formule:'Longue Durée',  options:['Nettoyage int. +20€'], total:104, statut:'parking',   paiement:'en_ligne', notes:'Cliente régulière' },
+  { id:'PAO-2025-0004', clientId:6, dep:'2025-04-15', ret:'2025-04-25', hdep:'07:30', hret:'19:00', terminal:'Orly 4', formule:'Longue Durée',  options:['Lavage ext. +15€','Prioritaire +12€'], total:97,  statut:'attente',   paiement:'virement', notes:'Client VIP' },
+  { id:'PAO-2025-0005', clientId:4, dep:'2025-04-20', ret:'2025-04-24', hdep:'10:00', hret:'16:00', terminal:'Orly 3', formule:'Essentielle',   options:[], total:36,  statut:'confirmee', paiement:'en_ligne', notes:'' },
+  { id:'PAO-2025-0006', clientId:5, dep:'2025-03-10', ret:'2025-03-11', hdep:'08:00', hret:'22:00', terminal:'Orly 1', formule:'Essentielle',   options:[], total:9,   statut:'terminee',  paiement:'sur_place', notes:'' },
+];
+
+let nextClientId = 7;
+let calYear = 2025; let calMonth = 3; // April (0-indexed)
+
+// ─── UTILS ─────────────────────────────
+function fDate(s){ if(!s)return'—'; const d=new Date(s+'T12:00:00'); return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+function diffJ(a,b){ return Math.ceil((new Date(b)-new Date(a))/86400000); }
+function clientName(id){ const c=clients.find(x=>x.id===id); return c?c.prenom+' '+c.nom:'Inconnu'; }
+function clientObj(id){ return clients.find(x=>x.id===id)||{}; }
+function nextResaId(){ const nums=reservations.map(r=>parseInt(r.id.split('-')[2])); return 'PAO-2025-'+(Math.max(...nums,0)+1).toString().padStart(4,'0'); }
+
+function statusBadge(s){
+  const map={ confirmee:'<span class="badge b-green">✓ Confirmée</span>', attente:'<span class="badge b-orange">⏳ En attente</span>', parking:'<span class="badge b-blue">🅿 En parking</span>', terminee:'<span class="badge b-muted">✅ Terminée</span>', annulee:'<span class="badge b-red">✕ Annulée</span>' };
+  return map[s]||s;
+}
+function fidelityBadge(n){
+  if(n>=10) return '<span class="badge b-gold">⭐ VIP</span>';
+  if(n>=5)  return '<span class="badge b-purple">💎 Fidèle</span>';
+  if(n>=2)  return '<span class="badge b-green">👍 Régulier</span>';
+  return '<span class="badge b-muted">Nouveau</span>';
+}
+
+function toast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+type;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none', 2800);
+}
+
+// ─── NAVIGATION ────────────────────────
+const pageTitles = { dashboard:'Tableau de bord', reservations:'Réservations', calendrier:'Calendrier', clients:'Clients', tarifs:'Tarifs & Saisons', stats:'Statistiques & CA', impression:'Imprimer les bons' };
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const nav = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  if(nav) nav.classList.add('active');
+  document.getElementById('topbarTitle').textContent = pageTitles[id]||id;
+  if(id==='reservations') renderResaTable(reservations);
+  if(id==='calendrier') renderCalendar();
+  if(id==='clients') renderClientTable(clients);
+  if(id==='stats') renderStats();
+  if(id==='dashboard') renderDashboard();
+  if(id==='impression') { renderPrintSelect(); document.getElementById('printPreviewZone').style.display='none'; document.getElementById('printEmpty').style.display='block'; }
+}
+
+// ─── DASHBOARD ─────────────────────────
+function renderDashboard(){
+  const pending = reservations.filter(r=>r.statut==='attente');
+  document.getElementById('badge-resa').textContent = pending.length;
+  const tbody = document.getElementById('dashResaTable');
+  tbody.innerHTML = pending.map(r=>{
+    const c = clientObj(r.clientId);
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted)">${r.id}</td>
+      <td><strong>${c.prenom||''} ${c.nom||''}</strong></td>
+      <td>${fDate(r.dep)}</td><td>${fDate(r.ret)}</td>
+      <td>${diffJ(r.dep,r.ret)}j</td>
+      <td><span class="badge b-gold">${r.formule}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--green)">${r.total.toFixed(2)}€</td>
+      <td>${statusBadge(r.statut)}</td>
+      <td>
+        <button class="btn btn-green btn-sm" onclick="changeStatus('${r.id}','confirmee')">✓ Confirmer</button>
+        <button class="btn btn-ghost btn-sm" onclick="printResaId('${r.id}')">🖨</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const today = new Date().toISOString().split('T')[0];
+  const todayDep = reservations.filter(r=>r.dep===today);
+  const todayRet = reservations.filter(r=>r.ret===today);
+
+  document.getElementById('todayDep').innerHTML = todayDep.length
+    ? todayDep.map(r=>`<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);padding:0.4rem 0.6rem;font-size:0.75rem"><strong>${clientName(r.clientId)}</strong> · ${r.hdep} · ${r.terminal}</div>`).join('')
+    : '<div style="font-size:0.75rem;color:var(--muted)">Aucun départ aujourd\'hui</div>';
+
+  document.getElementById('todayRet').innerHTML = todayRet.length
+    ? todayRet.map(r=>`<div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);padding:0.4rem 0.6rem;font-size:0.75rem"><strong>${clientName(r.clientId)}</strong> · ${r.hret} · ${r.terminal}</div>`).join('')
+    : '<div style="font-size:0.75rem;color:var(--muted)">Aucun retour aujourd\'hui</div>';
+}
+
+// ─── RESERVATIONS ──────────────────────
+function renderResaTable(data){
+  const tbody = document.getElementById('resaTable');
+  document.getElementById('resaCount').textContent = data.length + ' réservation' + (data.length>1?'s':'');
+  tbody.innerHTML = data.map(r=>{
+    const c = clientObj(r.clientId);
+    const j = diffJ(r.dep,r.ret);
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.73rem;color:var(--muted)">${r.id}</td>
+      <td><strong>${c.prenom||''} ${c.nom||''}</strong><br><span style="font-size:0.7rem;color:var(--muted)">${c.tel||''}</span></td>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem">${c.plaque||'—'}</span><br><span style="font-size:0.7rem;color:var(--muted)">${c.marque||''} ${c.modele||''}</span></td>
+      <td>${fDate(r.dep)}<br><span style="font-size:0.7rem;color:var(--muted)">${r.hdep} · ${r.terminal}</span></td>
+      <td>${fDate(r.ret)}<br><span style="font-size:0.7rem;color:var(--muted)">${r.hret}</span></td>
+      <td style="text-align:center"><strong>${j}</strong><br><span style="font-size:0.7rem;color:var(--muted)">jours</span></td>
+      <td><span class="badge b-gold">${r.formule}</span>${r.options.length?'<br><span style="font-size:0.65rem;color:var(--muted)">+'+r.options.length+' option'+(r.options.length>1?'s':'')+'</span>':''}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:600">${r.total.toFixed(2)}€</td>
+      <td>${statusBadge(r.statut)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editResa('${r.id}')" title="Modifier">✏</button>
+        <button class="btn btn-ghost btn-sm" onclick="printResaId('${r.id}')" title="Imprimer">🖨</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteResa('${r.id}')" title="Supprimer">🗑</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">Aucune réservation trouvée</td></tr>';
+}
+
+function filterResas(q){ renderResaTable(reservations.filter(r=>{ const c=clientObj(r.clientId); const str=(c.prenom+c.nom+c.plaque+r.id).toLowerCase(); return str.includes(q.toLowerCase()); })); }
+function filterByStatus(s){ renderResaTable(s?reservations.filter(r=>r.statut===s):reservations); }
+function filterByMonth(m){ renderResaTable(m?reservations.filter(r=>new Date(r.dep).getMonth()+1===parseInt(m)):reservations); }
+
+function openNewResa(){
+  document.getElementById('modalResaTitle').textContent = 'Nouvelle réservation';
+  document.getElementById('mr-client').innerHTML = clients.map(c=>`<option value="${c.id}">${c.prenom} ${c.nom} — ${c.plaque}</option>`).join('');
+  ['mr-dep','mr-ret','mr-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mr-statut').value='attente';
+  document.getElementById('mr-total').value='';
+  document.getElementById('modalResa').dataset.editId='';
+  document.getElementById('modalResa').classList.add('open');
+}
+
+function editResa(id){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  document.getElementById('modalResaTitle').textContent = 'Modifier — '+id;
+  document.getElementById('mr-client').innerHTML = clients.map(c=>`<option value="${c.id}"${c.id===r.clientId?' selected':''}>${c.prenom} ${c.nom} — ${c.plaque}</option>`).join('');
+  document.getElementById('mr-dep').value = r.dep;
+  document.getElementById('mr-ret').value = r.ret;
+  document.getElementById('mr-hdep').value = r.hdep;
+  document.getElementById('mr-hret').value = r.hret;
+  document.getElementById('mr-terminal').value = r.terminal;
+  document.getElementById('mr-formule').value = r.formule;
+  document.getElementById('mr-statut').value = r.statut;
+  document.getElementById('mr-total').value = r.total;
+  document.getElementById('mr-paiement').value = r.paiement;
+  document.getElementById('mr-notes').value = r.notes;
+  document.getElementById('modalResa').dataset.editId = id;
+  document.getElementById('modalResa').classList.add('open');
+}
+
+function saveResa(){
+  const editId = document.getElementById('modalResa').dataset.editId;
+  const newR = {
+    id: editId || nextResaId(),
+    clientId: parseInt(document.getElementById('mr-client').value),
+    dep: document.getElementById('mr-dep').value,
+    ret: document.getElementById('mr-ret').value,
+    hdep: document.getElementById('mr-hdep').value,
+    hret: document.getElementById('mr-hret').value,
+    terminal: document.getElementById('mr-terminal').value,
+    formule: document.getElementById('mr-formule').value,
+    statut: document.getElementById('mr-statut').value,
+    total: parseFloat(document.getElementById('mr-total').value)||0,
+    paiement: document.getElementById('mr-paiement').value,
+    notes: document.getElementById('mr-notes').value,
+    options: Array.from(document.getElementById('mr-options').selectedOptions).map(o=>o.value),
+  };
+  if(editId){ const i=reservations.findIndex(x=>x.id===editId); reservations[i]=newR; }
+  else reservations.unshift(newR);
+  closeModal('modalResa');
+  renderResaTable(reservations);
+  renderDashboard();
+  toast(editId ? '✅ Réservation modifiée' : '✅ Réservation créée — '+newR.id);
+}
+
+function deleteResa(id){
+  if(!confirm('Supprimer la réservation '+id+' ?')) return;
+  reservations = reservations.filter(r=>r.id!==id);
+  renderResaTable(reservations); renderDashboard();
+  toast('🗑 Réservation supprimée', 'info');
+}
+
+function changeStatus(id, status){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  r.statut = status;
+  renderDashboard(); renderResaTable(reservations);
+  toast('✅ Statut mis à jour');
+}
+
+function exportCSV(){
+  const rows = [['N° Résa','Client','Véhicule','Départ','Retour','Jours','Formule','Total','Statut']];
+  reservations.forEach(r=>{
+    const c=clientObj(r.clientId);
+    rows.push([r.id,c.prenom+' '+c.nom,c.plaque,r.dep,r.ret,diffJ(r.dep,r.ret),r.formule,r.total,r.statut]);
+  });
+  const csv = rows.map(r=>r.join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download = 'reservations-parkingaeroportorly.csv';
+  a.click();
+  toast('⬇ Export CSV téléchargé', 'info');
+}
+
+// ─── CALENDAR ──────────────────────────
+function renderCalendar(){
+  const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const DAYS   = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  document.getElementById('calMonthTitle').textContent = MONTHS[calMonth]+' '+calYear;
+  const grid = document.getElementById('calGrid');
+  let html = DAYS.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const first = new Date(calYear, calMonth, 1);
+  let startDow = first.getDay(); startDow = startDow===0?6:startDow-1;
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+
+  // Prev month filler
+  for(let i=startDow-1;i>=0;i--){
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${daysInPrev-i}</div></div>`;
+  }
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const arrivals = reservations.filter(r=>r.dep===dateStr);
+    const returns  = reservations.filter(r=>r.ret===dateStr);
+    const inPark   = reservations.filter(r=>r.dep<dateStr&&r.ret>dateStr&&r.statut==='parking').length;
+    let events = '';
+    arrivals.forEach(r=>{ events+=`<div class="cal-event arr">↑ ${clientName(r.clientId).split(' ')[0]}</div>`; });
+    returns.forEach(r=>{  events+=`<div class="cal-event dep">↓ ${clientName(r.clientId).split(' ')[0]}</div>`; });
+    if(inPark>0) events+=`<div class="cal-event park">${inPark} 🅿</div>`;
+    html += `<div class="cal-day${isToday?' today':''}" onclick="calDayClick('${dateStr}')"><div class="cal-day-num">${d}</div>${events}</div>`;
+  }
+
+  // Fill rest
+  const total = startDow + daysInMonth;
+  const rem = total%7===0?0:7-(total%7);
+  for(let i=1;i<=rem;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  grid.innerHTML = html;
+}
+
+function changeMonth(dir){ calMonth+=dir; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calDayClick(date){
+  const arr = reservations.filter(r=>r.dep===date);
+  const ret = reservations.filter(r=>r.ret===date);
+  if(arr.length+ret.length===0){ toast('Aucune réservation ce jour','info'); return; }
+  let msg = `📅 ${fDate(date)}\n`;
+  arr.forEach(r=>msg+=`\n↑ DÉPART : ${clientName(r.clientId)} (${r.id})`);
+  ret.forEach(r=>msg+=`\n↓ RETOUR : ${clientName(r.clientId)} (${r.id})`);
+  alert(msg);
+}
+
+// ─── CLIENTS ───────────────────────────
+function renderClientTable(data){
+  document.getElementById('clientCount').textContent = data.length+' client'+(data.length>1?'s':'');
+  document.getElementById('clientTable').innerHTML = data.map(c=>`<tr>
+    <td><strong>${c.prenom} ${c.nom}</strong>${c.notes?'<br><span style="font-size:0.68rem;color:var(--gold)">'+c.notes+'</span>':''}</td>
+    <td>${c.tel}</td>
+    <td style="font-size:0.78rem">${c.email}</td>
+    <td><span style="font-family:\'JetBrains Mono\',monospace;font-size:0.78rem">${c.plaque}</span><br><span style="font-size:0.7rem;color:var(--muted)">${c.marque} ${c.modele} · ${c.couleur}</span></td>
+    <td style="text-align:center">${c.nbResas}</td>
+    <td style="font-family:\'JetBrains Mono\',monospace;color:var(--green)">${c.caTotal}€</td>
+    <td>${fidelityBadge(c.nbResas)}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-ghost btn-sm" onclick="editClient(${c.id})">✏</button>
+      <button class="btn btn-primary btn-sm" onclick="newResaForClient(${c.id})">+ Résa</button>
+    </td>
+  </tr>`).join('');
+}
+function filterClients(q){ renderClientTable(clients.filter(c=>(c.prenom+c.nom+c.email+c.tel+c.plaque).toLowerCase().includes(q.toLowerCase()))); }
+
+function openNewClient(){
+  ['mc-prenom','mc-nom','mc-tel','mc-email','mc-marque','mc-modele','mc-plaque','mc-couleur','mc-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modalClient').dataset.editId='';
+  document.getElementById('modalClient').classList.add('open');
+}
+function editClient(id){
+  const c=clients.find(x=>x.id===id); if(!c) return;
+  document.getElementById('mc-prenom').value=c.prenom; document.getElementById('mc-nom').value=c.nom;
+  document.getElementById('mc-tel').value=c.tel; document.getElementById('mc-email').value=c.email;
+  document.getElementById('mc-marque').value=c.marque; document.getElementById('mc-modele').value=c.modele;
+  document.getElementById('mc-plaque').value=c.plaque; document.getElementById('mc-couleur').value=c.couleur;
+  document.getElementById('mc-notes').value=c.notes;
+  document.getElementById('modalClient').dataset.editId=id;
+  document.getElementById('modalClient').classList.add('open');
+}
+function saveClient(){
+  const editId=parseInt(document.getElementById('modalClient').dataset.editId)||0;
+  const nc={ id:editId||nextClientId++, prenom:document.getElementById('mc-prenom').value, nom:document.getElementById('mc-nom').value,
+    tel:document.getElementById('mc-tel').value, email:document.getElementById('mc-email').value,
+    marque:document.getElementById('mc-marque').value, modele:document.getElementById('mc-modele').value,
+    plaque:document.getElementById('mc-plaque').value.toUpperCase(), couleur:document.getElementById('mc-couleur').value,
+    notes:document.getElementById('mc-notes').value, nbResas:0, caTotal:0 };
+  if(editId){ const i=clients.findIndex(x=>x.id===editId); clients[i]={...clients[i],...nc}; }
+  else clients.push(nc);
+  closeModal('modalClient'); renderClientTable(clients);
+  toast(editId?'✅ Client modifié':'✅ Client créé');
+}
+function newResaForClient(id){ showPage('reservations'); openNewResa(); document.getElementById('mr-client').value=id; }
+
+// ─── STATS ─────────────────────────────
+function renderStats(){
+  const mois=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+  const ca=[1200,1450,2100,3200,2800,4100,5200,5000,3600,2100,1800,4820];
+  const resas=[8,10,15,28,22,35,42,40,30,18,14,35];
+  const maxCA=Math.max(...ca); const maxR=Math.max(...resas);
+
+  document.getElementById('chartCA').innerHTML = ca.map((v,i)=>`
+    <div class="chart-row">
+      <div class="chart-label">${mois[i]}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(v/maxCA*100).toFixed(0)}%;background:var(--green)"></div></div>
+      <div class="chart-val">${v}€</div>
+    </div>`).join('');
+
+  document.getElementById('chartResas').innerHTML = resas.map((v,i)=>`
+    <div class="chart-row">
+      <div class="chart-label">${mois[i]}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(v/maxR*100).toFixed(0)}%;background:var(--blue)"></div></div>
+      <div class="chart-val">${v} résa</div>
+    </div>`).join('');
+
+  const fml=[{n:'Essentielle',v:42,c:'var(--gold)'},{n:'Confort',v:35,c:'var(--purple)'},{n:'Longue Durée',v:23,c:'var(--green)'}];
+  document.getElementById('chartFormule').innerHTML = fml.map(f=>`
+    <div class="chart-row">
+      <div class="chart-label">${f.n}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${f.v}%;background:${f.c}"></div></div>
+      <div class="chart-val">${f.v}%</div>
+    </div>`).join('');
+
+  const duree=[{n:'1-3j',v:15},{n:'4-7j',v:45},{n:'8-14j',v:30},{n:'15j+',v:10}];
+  const maxD=Math.max(...duree.map(d=>d.v));
+  document.getElementById('chartDuree').innerHTML = duree.map(d=>`
+    <div class="chart-row">
+      <div class="chart-label">${d.n}</div>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${(d.v/maxD*100).toFixed(0)}%;background:var(--orange)"></div></div>
+      <div class="chart-val">${d.v}%</div>
+    </div>`).join('');
+}
+
+// ─── TARIFS ────────────────────────────
+function saveTarifs(){ toast('✅ Tarifs enregistrés — synchronisation avec le site en cours'); }
+
+// ─── IMPRESSION ────────────────────────
+function renderPrintSelect(){
+  const sel = document.getElementById('printResaSelect');
+  sel.innerHTML = '<option value="">-- Choisir une réservation --</option>' +
+    reservations.map(r=>{ const c=clientObj(r.clientId); return `<option value="${r.id}">${r.id} — ${c.prenom} ${c.nom} · ${c.plaque||'?'} · ${fDate(r.dep)}→${fDate(r.ret)}</option>`; }).join('');
+}
+
+function loadPrintPreview(id){
+  if(!id){ document.getElementById('printPreviewZone').style.display='none'; document.getElementById('printEmpty').style.display='block'; return; }
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  const c = clientObj(r.clientId);
+  const j = diffJ(r.dep,r.ret);
+  document.getElementById('printPreviewZone').style.display='block';
+  document.getElementById('printEmpty').style.display='none';
+
+  // BON CLIENT
+  document.getElementById('bc-num').textContent      = r.id;
+  document.getElementById('bc-nom').textContent      = c.prenom+' '+c.nom;
+  document.getElementById('bc-tel').textContent      = c.tel||'—';
+  document.getElementById('bc-email').textContent    = c.email||'—';
+  document.getElementById('bc-plaque').textContent   = c.plaque||'—';
+  document.getElementById('bc-vehicule').textContent = (c.marque||'')+' '+(c.modele||'');
+  document.getElementById('bc-couleur').textContent  = c.couleur||'—';
+  document.getElementById('bc-dep').textContent      = fDate(r.dep);
+  document.getElementById('bc-hdep').textContent     = r.hdep;
+  document.getElementById('bc-terminal').textContent = r.terminal;
+  document.getElementById('bc-ret').textContent      = fDate(r.ret);
+  document.getElementById('bc-hret').textContent     = r.hret;
+  document.getElementById('bc-duree').textContent    = j+' jour'+(j>1?'s':'');
+  document.getElementById('bc-formule').textContent  = r.formule + (r.options.length?' + '+r.options.join(', '):'');
+  document.getElementById('bc-total').textContent    = r.total.toFixed(2)+' €';
+
+  // BON PARE-BRISE
+  document.getElementById('pb-plaque').textContent   = c.plaque||'XX-000-XX';
+  document.getElementById('pb-num').textContent      = r.id;
+  document.getElementById('pb-nom').textContent      = c.prenom+' '+c.nom;
+  document.getElementById('pb-dep').textContent      = fDate(r.dep)+' à '+r.hdep;
+  document.getElementById('pb-ret').textContent      = fDate(r.ret)+' vers '+r.hret;
+  document.getElementById('pb-duree').textContent    = j+' jour'+(j>1?'s':'');
+  document.getElementById('pb-terminal').textContent = r.terminal;
+  document.getElementById('pb-formule').textContent  = r.formule;
+  document.getElementById('pb-num2').textContent     = r.id+' · parkingaeroportorly.fr';
+
+  // BON CLÉ
+  document.getElementById('cle-num').textContent     = r.id;
+  document.getElementById('cle-nom').textContent     = c.prenom+' '+c.nom;
+  document.getElementById('cle-plaque').textContent  = c.plaque||'XX-000-XX';
+  document.getElementById('cle-dep').textContent     = fDate(r.dep);
+  document.getElementById('cle-ret').textContent     = fDate(r.ret);
+  document.getElementById('cle-formule').textContent = r.formule;
+}
+
+function printResaId(id){
+  showPage('impression');
+  document.getElementById('printResaSelect').value = id;
+  loadPrintPreview(id);
+}
+
+function printAllBons(){
+  const id = document.getElementById('printResaSelect').value;
+  if(!id){ toast('⚠️ Sélectionnez une réservation d\'abord','info'); return; }
+  window.print();
+}
+function printBon(type){
+  const id = document.getElementById('printResaSelect').value;
+  if(!id){ toast('⚠️ Sélectionnez une réservation','info'); return; }
+  toast('🖨 Impression du bon '+type+' en cours...','info');
+  window.print();
+}
+
+// ─── MODAL ─────────────────────────────
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+
+// ─── INIT ──────────────────────────────
+function initApp(){
+  const now = new Date();
+  document.getElementById('topbarDate').textContent = now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  calYear=now.getFullYear(); calMonth=now.getMonth();
+  renderDashboard();
+  setInterval(()=>{
+    const n=new Date();
+    document.getElementById('topbarDate').textContent = n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' '+n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  }, 30000);
+}
+</script>
+</body>
+</html>
